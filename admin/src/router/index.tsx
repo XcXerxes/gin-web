@@ -4,14 +4,10 @@ import RouterConfig from './routerConfig'
 
 const routers = () => (
   <Switch>
-    <Redirect from="/" to="/article/list" exact />
+    <Redirect from="/" to="/categroy/list" exact />
     {RouterConfig.map((item: any) => {
       return (
-        <Route
-          key={item.path}
-          path={item.path}
-          component={item.component}
-        />
+        <Route key={item.path} path={item.path} component={item.component} />
       )
     })}
   </Switch>

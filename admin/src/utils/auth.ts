@@ -3,7 +3,7 @@
  * @Author: leo
  * @Date: 2019-09-19 14:30:07
  * @LastEditors: leo
- * @LastEditTime: 2019-09-19 14:35:25
+ * @LastEditTime: 2020-02-25 16:38:48
  */
 import Cookie from 'js-cookie'
 const tokenName: string = 'Authorization'

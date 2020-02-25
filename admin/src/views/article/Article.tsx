@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react'
-import { Table, Form, Divider, Layout, Button, Modal, message } from 'antd'
+import { Table, Divider, Layout, Button, Modal, message, Form } from 'antd'
 import api from 'api'
 import { iSuccessResult } from '@interface/global.interface'
 import dayjs from 'dayjs'
 
 const { Content } = Layout
 
-const data:any = Array.from({ length: 6 }).map((_item, index: number) => {
+const data: any = Array.from({ length: 6 }).map((_item, index: number) => {
   return {
     id: index + 1,
     title: `第一技术 ${index}`,
@@ -16,9 +16,9 @@ const data:any = Array.from({ length: 6 }).map((_item, index: number) => {
 })
 
 export interface ArticleProps {
-  history?: any;
+  history?: any
 }
-const Article:React.FC<ArticleProps> = ({ history }) => {
+const Article: React.FC<ArticleProps> = ({ history }) => {
   const columns = [
     {
       title: '标题',
@@ -46,11 +46,23 @@ const Article:React.FC<ArticleProps> = ({ history }) => {
       dataIndex: 'actions',
       key: 'actions',
       align: 'center' as 'center',
-      render: (_text: any, record:any) => (
+      render: (_text: any, record: any) => (
         <span>
-          <Button size="small" type="primary" onClick={() => editHandle(record)}>编辑</Button>
+          <Button
+            size="small"
+            type="primary"
+            onClick={() => editHandle(record)}
+          >
+            编辑
+          </Button>
           <Divider type="vertical" />
-          <Button size="small" type="danger" onClick={() => deleteHandle(record)}>删除</Button>
+          <Button
+            size="small"
+            type="danger"
+            onClick={() => deleteHandle(record)}
+          >
+            删除
+          </Button>
         </span>
       )
     }
@@ -68,45 +80,44 @@ const Article:React.FC<ArticleProps> = ({ history }) => {
     showTotal: (total: number) => `总条数 ${total} 条`
   }
   // 发布文章
-  function createArticle () {
+  function createArticle() {
     history.push('/article/create')
   }
   // 编辑文章
-  function editHandle (record: any) {
+  function editHandle(record: any) {
     history.push(`/article/create?id=${record._id}`)
   }
   // 删除文章
-  function deleteHandle (record: any) {
+  function deleteHandle(record: any) {
     Modal.confirm({
       title: '提示',
       content: '确定要删除吗？',
       okText: '确认',
       cancelText: '取消',
-      icon: null,
       onOk: () => {
         deleteArticleById(record._id)
       }
     })
   }
   // 删除当前的文章
-  async function deleteArticleById (id: string) {
+  async function deleteArticleById(id: string) {
     try {
-      const result:iSuccessResult = await api.deleteArticleById({id})
+      const result: iSuccessResult = await api.deleteArticleById({ id })
       if (result.code === 200) {
-        message.success(result.message || '删除成功')
+        message.success(result.msg || '删除成功')
         fetchList()
       } else {
-        message.error(result.message)
+        message.error(result.msg)
       }
     } catch (error) {
       message.error(error.toString())
     }
   }
   // 获取文章列表
-  async function fetchList () {
+  async function fetchList() {
     try {
       setloading(true)
-      const result:iSuccessResult = await api.articleList({page, rows: 10})
+      const result: iSuccessResult = await api.articleList({ page, rows: 10 })
       setloading(false)
       if (result.code === 200) {
         setcount(result.data.count)
@@ -124,7 +135,9 @@ const Article:React.FC<ArticleProps> = ({ history }) => {
     <Content>
       <Form layout="inline">
         <Form.Item>
-          <Button type="primary" onClick={createArticle}>发布文章</Button>
+          <Button type="primary" onClick={createArticle}>
+            发布文章
+          </Button>
         </Form.Item>
       </Form>
       <Table

@@ -1,21 +1,21 @@
 import React from 'react'
 import { iRoute } from '@interface/router.interface'
-import {matchMenuPath, matchOpenPath} from 'router/util'
+import { matchMenuPath, matchOpenPath } from 'router/util'
 import RouterConfig from 'router/routerConfig'
-import { Menu, Icon } from 'antd'
-const {SubMenu, ItemGroup} = Menu
+import { Menu } from 'antd'
+const { SubMenu, ItemGroup } = Menu
 
 interface BasicMenuProps {
-  title?: string;
-  history?: any;
+  title?: string
+  history?: any
 }
-const BasicMenu:React.FC<BasicMenuProps> = ({ history }) => {
+const BasicMenu: React.FC<BasicMenuProps> = ({ history }) => {
   const { pathname } = history.location
   const defaultSelectedKeys = matchMenuPath(pathname)
   const defaultOpenKeys = matchOpenPath(pathname)
   console.log(defaultOpenKeys)
   // 切换菜单
-  function handleMenu (e: any) {
+  function handleMenu(e: any) {
     history.push(e.key)
   }
   return (
@@ -27,25 +27,23 @@ const BasicMenu:React.FC<BasicMenuProps> = ({ history }) => {
       style={{ height: '100%', borderRight: 0 }}
       onClick={handleMenu}
     >
-      {
-        RouterConfig.map(MenuSub)
-      }
+      {RouterConfig.map(MenuSub)}
     </Menu>
   )
 }
 
 type SubPropsType = {
-  routes?: iRoute[],
-  name: string,
-  path?: string,
-  icon?: string
+  routes?: iRoute[]
+  name: string
+  path?: string
+  icon?: React.ReactElement
 }
 
-const MenuSub: React.FC<SubPropsType> = ({routes, name, path, icon}) => {
+const MenuSub: React.FC<SubPropsType> = ({ routes, name, path, icon }) => {
   if (path && routes && routes.length > 0) {
     console.log('-------subMenu', path)
     return (
-    <SubMenu key={path} title={<TitleRender {...{name, icon}} />}>
+      <SubMenu key={path} title={<TitleRender {...{ name, icon }} />}>
         {routes.map(MenuSub)}
       </SubMenu>
     )
@@ -58,29 +56,29 @@ const MenuSub: React.FC<SubPropsType> = ({routes, name, path, icon}) => {
   } else {
     return (
       <Menu.Item key={path}>
-        <TitleRender {...{name, icon}} />
+        <TitleRender {...{ name, icon }} />
       </Menu.Item>
     )
   }
 }
 
 type TitlePropsType = {
-  name: string,
-  icon?: string | any
+  name: string
+  icon?: React.ReactElement
 }
 
-const TitleRender: React.FC<TitlePropsType> = ({name, icon}) => {
+const TitleRender: React.FC<TitlePropsType> = ({ name, icon }) => {
   if (icon && typeof icon === 'string') {
     return (
       <span>
-        <Icon type={icon} />
+        {icon}
         <span>{name}</span>
       </span>
     )
   } else if (icon && typeof icon === 'object' && icon.type) {
     return (
       <span>
-        <Icon type={icon.type} theme={icon.theme} />
+        {icon}
         <span>{name}</span>
       </span>
     )
@@ -92,6 +90,5 @@ const TitleRender: React.FC<TitlePropsType> = ({name, icon}) => {
     )
   }
 }
-
 
 export default BasicMenu

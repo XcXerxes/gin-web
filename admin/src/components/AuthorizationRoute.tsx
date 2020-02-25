@@ -4,9 +4,11 @@ import { getToken } from 'utils/auth'
 import Nprogress from 'nprogress'
 
 interface AuthorizationRouteProps {
-  component: any;
+  component: any
 }
-const AuthorizationRoute:React.FC<AuthorizationRouteProps> = ({ component }) => {
+const AuthorizationRoute: React.FC<AuthorizationRouteProps> = ({
+  component
+}) => {
   Nprogress.start()
   const Component = component
   const token = getToken()
@@ -14,13 +16,9 @@ const AuthorizationRoute:React.FC<AuthorizationRouteProps> = ({ component }) => 
     Nprogress.done()
   })
   if (!token) {
-    return (
-      <Redirect to="signin" />
-    )
+    return <Redirect to="signin" />
   }
-  return (
-    <Component />
-  )
+  return <Component />
 }
 
 export default AuthorizationRoute

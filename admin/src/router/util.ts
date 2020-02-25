@@ -5,49 +5,53 @@
  * @LastEditors: leo
  * @LastEditTime: 2019-09-17 13:26:00
  */
-import RouterConfig from "./routerConfig";
+import RouterConfig from './routerConfig'
 export interface iRoute {
-  icon?: string | any,
-  name: string,
-  routes?: iRoute[];
-  path?: string;
-  component?: any;
+  icon?: string | any
+  name: string
+  routes?: iRoute[]
+  path?: string
+  component?: any
 }
 // 整理menu格式到一维路由数组，供router可用
 export const sortToRoute = (route: iRoute[]) => {
-  let result: iRoute[] = [];
+  let result: iRoute[] = []
   const rl = (r: iRoute[]) => {
     r.forEach((nextr: iRoute) => {
       if (nextr.path) {
-        result.push({path: nextr.path, component: nextr.component, name: nextr.name});
+        result.push({
+          path: nextr.path,
+          component: nextr.component,
+          name: nextr.name
+        })
       }
       if (nextr.routes && nextr.routes.length > 0) {
-        rl(nextr.routes);
+        rl(nextr.routes)
       }
     })
   }
   rl(route)
-  return result;
+  return result
 }
 // 查找路由链路
 export const searchRouterLinkList = (path: string): any[] => {
-  let result: any[] = [];
+  let result: any[] = []
   const c: any = (config: iRoute[]) => {
     for (let i = 0; i < config.length; i++) {
-      let r: iRoute = config[i];
+      let r: iRoute = config[i]
       if (r.path === path) {
-        result.push(r);
-        return r;
+        result.push(r)
+        return r
       } else if (r.routes !== undefined) {
-        let k = c(r.routes);
+        let k = c(r.routes)
         if (k) {
-          result.push(r);
+          result.push(r)
         }
       }
     }
   }
-  c(RouterConfig);
-  return result.reverse();
+  c(RouterConfig)
+  return result.reverse()
 }
 
 /**
@@ -58,32 +62,32 @@ export const searchRouterLinkList = (path: string): any[] => {
  * @param {String} path
  */
 export const matchMenuPath = (path: string) => {
-  let pathArray = path.split('/');
+  let pathArray = path.split('/')
   const c: any = (config: iRoute[], rPath: string) => {
     for (let i = 0; i < config.length; i++) {
-      let r: iRoute = config[i];
+      let r: iRoute = config[i]
       if (r.path === rPath) {
-        return r.path;
+        return r.path
       } else if (r.routes !== undefined) {
-        let k = c(r.routes, rPath);
-        if (k) return k;
+        let k = c(r.routes, rPath)
+        if (k) return k
       }
     }
   }
   do {
-    let r = c(RouterConfig, pathArray.join('/'));
+    let r = c(RouterConfig, pathArray.join('/'))
     if (r) {
-      return r;
+      return r
     } else {
-      pathArray.pop();
+      pathArray.pop()
     }
-  } while (pathArray.length >= 1);
+  } while (pathArray.length >= 1)
   return '/article/list'
 }
 
 /**
  * 查找当前路由的根匹配菜单
- * @param path 
+ * @param path
  */
 export const matchOpenPath = (path: string) => {
   if (!path || path === '/') return '/article'

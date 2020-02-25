@@ -7,12 +7,10 @@ import { withRouter } from 'react-router-dom'
 import { Layout, BackTop } from 'antd'
 const { Content, Sider } = Layout
 
-interface BasicLayoutProps {
-
-}
-const BasicLayout:React.FC<BasicLayoutProps> = (props) => {
+interface BasicLayoutProps {}
+const BasicLayout: React.FC<BasicLayoutProps> = props => {
   const [collapsed, setcollapsed] = useState(false)
-  function onCollapse (value: boolean) {
+  function onCollapse(value: boolean) {
     setcollapsed(value)
   }
   return (
@@ -32,7 +30,7 @@ const BasicLayout:React.FC<BasicLayoutProps> = (props) => {
           <Content
             style={{
               background: '#fff',
-              margin: 0,
+              margin: 0
             }}
           >
             <BaseRouters />
