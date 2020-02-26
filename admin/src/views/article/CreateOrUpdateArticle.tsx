@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import {
   Card,
   Input,
@@ -8,12 +8,19 @@ import {
   Col,
   Modal,
   message,
+  Switch,
   Form
 } from 'antd'
 // import Editor from 'tui-editor'
+import MarkdownIt from 'markdown-it'
+import ReactMarkdownEditor from 'react-markdown-editor-lite'
+import 'react-markdown-editor-lite/lib/index.css'
 import { useSelector } from 'react-redux'
 import { iSuccessResult } from '@interface/global.interface'
 import api from 'api'
+import { PlusCircleFilled } from '@ant-design/icons'
+
+const mdParser = new MarkdownIt()
 
 export interface IAdverCreateProps {
   test: string
@@ -23,18 +30,18 @@ export interface IAdverCreateProps {
 
 const AdverCreate: React.FC<IAdverCreateProps> = props => {
   const [form] = Form.useForm()
-  const [name, setname] = useState('')
-  const [caption, setcaption] = useState('')
-  const [author, setauthor] = useState('')
-  const [cateId, setcateId] = useState(1)
-  const [thumbnail, setthumbnail] = useState('')
   const [loading, setLoading] = useState(false)
   const [cardLoading, setCardLoading] = useState(false)
   const [previewVisible, setPreviewVisible] = useState(false)
   const [fileList, setFileList] = useState<any>([])
-  const [simplemd, setsimplemd] = useState<any>(null)
-  // const [content, setcontent] = useState('')
-  const editorRef = useRef<any>()
+  const [formData, setformData] = useState({
+    tag_id: '',
+    title: '',
+    desc: '',
+    cover_image_url: '',
+    content: '',
+    state: true
+  })
   const { categroy } = useSelector(
     useCallback(
       (state: any) => ({
@@ -43,7 +50,6 @@ const AdverCreate: React.FC<IAdverCreateProps> = props => {
       []
     )
   )
-  console.log('----------=============', categroy)
   const formItemLayout = {
     labelCol: {
       xs: { span: 24 },
@@ -71,38 +77,39 @@ const AdverCreate: React.FC<IAdverCreateProps> = props => {
     }
   }
   useEffect(() => {
-    // let currentSimplemd:any = new Editor({
-    //   el: editorRef.current,
-    //   initialEditType: 'markdown',
-    //   previewStyle: 'vertical',
-    //   height: '300px'
-    // })
-    // const { location } = props
-    // if (location.search) {
-    //   const id = location.search.split('=')[1]
-    //   getInfo(id, currentSimplemd)
-    // } else {
-    //   setsimplemd(currentSimplemd)
-    // }
+    const { location } = props
+    if (location.search) {
+      const id = location.search.split('=')[1]
+      getInfo(id)
+    }
   }, [])
   /**
    * 获取单个的信息
    * @param id
    */
-  async function getInfo(id: string, currentSimplemd: any) {
+  async function getInfo(id: string) {
     try {
       setCardLoading(true)
       const result: iSuccessResult = await api.articleItemById({ id })
       setCardLoading(false)
       if (result.code === 200) {
-        const { data } = result
-        setname(data.name)
-        setcaption(data.caption)
-        setauthor(data.author)
-        setcateId(data.cateId)
-        setthumbnail(data.thumbnail)
-        setsimplemd(currentSimplemd)
-        currentSimplemd.value(data.content)
+        const {
+          tag_id,
+          title,
+          desc,
+          content,
+          state,
+          cover_image_url
+        } = result.data
+        setformData((r: any) => ({
+          tag_id,
+          title,
+          desc,
+          content,
+          state: state === 0,
+          cover_image_url
+        }))
+        form.resetFields()
       } else {
         message.error(result.msg || '获取失败')
       }
@@ -116,22 +123,25 @@ const AdverCreate: React.FC<IAdverCreateProps> = props => {
    * @param e
    */
   function handleSubmit(values: any) {
+    const { content, cover_image_url } = formData
+    const newValues = {
+      ...values,
+      state: values.state ? 0 : 1,
+      cover_image_url,
+      content
+    }
     const { location } = props
     if (location.search) {
       const id = location.search.split('=')[1]
       updateAdver(id)
     } else {
-      createArticle(values)
+      createArticle(newValues)
     }
   }
   async function createArticle(params: any) {
     try {
       setLoading(true)
-      const result: iSuccessResult = await api.createArticle({
-        ...params,
-        content: simplemd.getMarkdown(),
-        thumbnail: thumbnail.replace(/.*\/$/, '')
-      })
+      const result: iSuccessResult = await api.createArticle(params)
       setLoading(false)
       if (result.code === 200) {
         message.success(result.msg || '创建成功')
@@ -153,23 +163,21 @@ const AdverCreate: React.FC<IAdverCreateProps> = props => {
       throw error
     }
   }
-  function handleSelectChange(value: number) {
-    console.log('======================')
-    setcateId(value)
-  }
   /**
    * 上传图片
    * @param info
    */
-  const uploadHandleChange = (info: any) => {
-    setFileList(info.fileList)
-    if (info.file.status === 'uploading') {
-      setLoading(true)
+  const uploadHandleChange = ({ file, fileList }: any) => {
+    setFileList(fileList)
+    if (file.status === 'uploading') {
+      // setLoading(true)
     }
-    console.log('========================', info)
-    if (info.file.status === 'done') {
-      setLoading(false)
-      setthumbnail(info.fileList[0].name)
+    if (file.status === 'done') {
+      setformData((r: any) => ({
+        ...r,
+        cover_image_url: file.response.data.image_save_url
+      }))
+      // setLoading(false)
     }
   }
   /**
@@ -186,17 +194,30 @@ const AdverCreate: React.FC<IAdverCreateProps> = props => {
   }
   const uploadButton = (
     <div>
-      {/* <LegacyIcon type={loading ? 'loading' : 'plus'} /> */}
+      <PlusCircleFilled style={{ fontSize: '28px' }} />
       <div className="ant-upload-text">上传图片</div>
     </div>
   )
-  const previewImage: string = 'http://localhost:7001/public/' + thumbnail
+  // 预览图片
+  const previewImage: string = React.useMemo(
+    () => 'http://localhost:8000/' + formData.cover_image_url,
+    [formData.cover_image_url]
+  )
+  // markdown 内容改变时调用
+  function handleEditorChange({ text }: any) {
+    setformData((r: any) => ({ ...r, content: text }))
+  }
   return (
-    <Card>
-      <Form onFinish={handleSubmit} {...formItemLayout}>
+    <Card loading={cardLoading}>
+      <Form
+        form={form}
+        initialValues={formData}
+        onFinish={handleSubmit}
+        {...formItemLayout}
+      >
         <Form.Item
-          label="文章名称"
-          name="name"
+          label="文章名称："
+          name="title"
           rules={[
             {
               required: true,
@@ -208,8 +229,8 @@ const AdverCreate: React.FC<IAdverCreateProps> = props => {
           <Input placeholder="请输入文章名称" />
         </Form.Item>
         <Form.Item
-          label="文章描述"
-          name="caption"
+          label="文章描述："
+          name="desc"
           rules={[
             {
               required: true,
@@ -221,21 +242,8 @@ const AdverCreate: React.FC<IAdverCreateProps> = props => {
           <Input.TextArea placeholder="请输入描述" rows={4} />
         </Form.Item>
         <Form.Item
-          label="作者名称"
-          name="author"
-          rules={[
-            {
-              required: true,
-              message: '请输入作者名称!'
-            }
-          ]}
-          hasFeedback={true}
-        >
-          <Input placeholder="请输入作者名称" />
-        </Form.Item>
-        <Form.Item
-          label="文章分类"
-          name="cateId"
+          label="文章分类："
+          name="tag_id"
           rules={[
             {
               required: true,
@@ -244,25 +252,42 @@ const AdverCreate: React.FC<IAdverCreateProps> = props => {
           ]}
           hasFeedback={true}
         >
-          <Select placeholder="请选择分类" onChange={handleSelectChange}>
+          <Select placeholder="请选择分类">
             {categroy.cateList.map((item: any) => (
-              <Select.Option key={item._id} value={item.sortNum}>
+              <Select.Option key={item.id} value={item.id}>
                 {item.name}
               </Select.Option>
             ))}
           </Select>
         </Form.Item>
-        <Form.Item label="缩略图" name="thumbnail">
+        <Form.Item
+          label="缩略图："
+          name="cover_image_url"
+          rules={[
+            {
+              required: true,
+              message: '请选择分类!'
+            }
+          ]}
+        >
           <div className="clearfix">
             <Upload
-              name="logo"
-              action={`/api/upload`}
+              name="image"
+              action={'http://localhost:8000/api/v1/upload'}
               listType="picture-card"
               onChange={uploadHandleChange}
               fileList={fileList}
               onPreview={handlePreview}
             >
-              {thumbnail ? null : uploadButton}
+              {formData.cover_image_url ? (
+                <img
+                  src={previewImage}
+                  alt="avatar"
+                  style={{ width: '100%' }}
+                />
+              ) : (
+                uploadButton
+              )}
             </Upload>
             <Modal
               visible={previewVisible}
@@ -273,18 +298,24 @@ const AdverCreate: React.FC<IAdverCreateProps> = props => {
             </Modal>
           </div>
         </Form.Item>
+        <Form.Item label="状态：" name="state" valuePropName="checked">
+          <Switch />
+        </Form.Item>
         <Form.Item
           {...contentItemLayout}
-          name="content"
           rules={[
             {
-              required: false,
-              message: '请输入名称!'
+              required: true,
+              message: '请输入文章内容!'
             }
           ]}
-          label="文章内容"
+          label="文章内容："
         >
-          <div ref={editorRef} />
+          <ReactMarkdownEditor
+            value={formData.content}
+            onChange={handleEditorChange}
+            renderHTML={text => mdParser.render(text)}
+          />
         </Form.Item>
         <Form.Item {...ButtonItemLayout}>
           <Col xs={24} sm={8}>

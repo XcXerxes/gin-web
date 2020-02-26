@@ -1,4 +1,4 @@
-import React, { useState, useEffect, FormEvent } from 'react'
+import React, { useState, useEffect } from 'react'
 import {
   Table,
   Divider,
@@ -12,14 +12,14 @@ import {
 } from 'antd'
 import { iSuccessResult } from '@interface/global.interface'
 import api from 'api'
+import { PlusCircleFilled, SearchOutlined } from '@ant-design/icons'
+import styles from './categroies.module.less'
+import dayjs from 'dayjs'
 
 const { Content } = Layout
 
 export interface CategroiesProps {}
-type formTypes = {
-  name: string
-  sort: number
-}
+
 const Categroies: React.FC<CategroiesProps> = () => {
   const [form] = Form.useForm()
   const columns = [
@@ -34,10 +34,15 @@ const Categroies: React.FC<CategroiesProps> = () => {
       dataIndex: 'state',
       key: 'state',
       align: 'center' as 'center',
+      render: (text: any) => <span>{text === 0 ? '启用' : '禁用'}</span>
+    },
+    {
+      title: '创建时间',
+      dataIndex: 'created_on',
+      key: 'state',
+      align: 'center' as 'center',
       render: (text: any) => (
-        <span>
-          {text === 0 ? '启用' : '禁用'}
-        </span>
+        <span>{dayjs.unix(text).format('YYYY-MM-DD HH:mm')}</span>
       )
     },
     {
@@ -69,10 +74,8 @@ const Categroies: React.FC<CategroiesProps> = () => {
   const [list, setlist] = useState([])
   const [visible, setvisible] = useState(false)
   const [tableLoading, settableLoading] = useState(false)
-  const [name, setname] = useState('')
-  const [sort, setsort] = useState('')
   const [id, setid] = useState('')
-  const [formData, setformData] = useState({ name: '', state: 0})
+  const [formData, setformData] = useState<any>({ name: '', state: true })
   const [queryParams, setqueryParams] = useState({
     page: 1,
     name: '',
@@ -83,26 +86,13 @@ const Categroies: React.FC<CategroiesProps> = () => {
 
   // 编辑单条数据
   function editHandle(record: any) {
-    getCateById(record._id)
-  }
-  // 获取单条数据
-  async function getCateById(id: string) {
-    try {
-      const result: iSuccessResult = await api.cateItemById({ id })
-      if (result.code === 200) {
-        const { name, sortNum, _id } = result.data
-        setvisible(true)
-        setname(name)
-        setsort(sortNum)
-        setid(_id)
-        console.log('-----------false')
-        setisAdd(false)
-      } else {
-        message.error(result.msg)
-      }
-    } catch (error) {
-      message.error(error.toString())
-    }
+    setformData((r: any) => ({
+      name: record.name,
+      state: record.state === 0 ? true : false
+    }))
+    setid(record.id)
+    setisAdd(false)
+    setvisible(true)
   }
   // 删除单条 api
   async function deleteCateById(id: string) {
@@ -126,7 +116,7 @@ const Categroies: React.FC<CategroiesProps> = () => {
       okText: '确认',
       cancelText: '取消',
       onOk: () => {
-        deleteCateById(record._id)
+        deleteCateById(record.id)
       }
     })
   }
@@ -151,36 +141,32 @@ const Categroies: React.FC<CategroiesProps> = () => {
     try {
       const result: iSuccessResult = await api.updateCate({
         ...values,
-        _id: id
+        id
       })
       if (result.code === 200) {
-        message.success(result.msg || '创建成功')
+        message.success(result.msg || '更新成功')
         form.resetFields()
         setvisible(false)
         getCateList()
       } else {
-        message.error(result.msg || '创建失败')
+        message.error(result.msg || '更新失败')
       }
     } catch (error) {
       message.error(error.toString())
     }
   }
-  // 分页配置
-  const paginationOptions = {
-    showQuickJumper: true,
-    showTotal: (total: number) => `总条数 ${total}`
-  }
   // 提交创建分类
   function handleSubmit(values: any) {
+    const newValues = { ...values, state: values.state ? 0 : 1 }
     if (isAdd) {
-      console.log('-----------------', values)
-      // createCate(values)
+      createCate(newValues)
     } else {
-      // updateCate(values)
+      updateCate(newValues)
     }
   }
   // 点击创建分类
   function handlecreateCate() {
+    setisAdd(true)
     setvisible(true)
   }
   // 取消
@@ -233,15 +219,33 @@ const Categroies: React.FC<CategroiesProps> = () => {
       }
     }
   }
+  // 页数改变时
+  function handleChange(page: number) {
+    setqueryParams((r: any) => ({ ...r, page }))
+  }
   return (
     <Content>
-      <Form layout="inline">
-        <Form.Item>
-          <Button type="primary" onClick={handlecreateCate}>
-            创建分类
-          </Button>
-        </Form.Item>
-      </Form>
+      <div className={styles.heading}>
+        <Form layout="inline">
+          <Form.Item>
+            <Input placeholder="请输入标签名" />
+          </Form.Item>
+          <Form.Item>
+            <Button type="primary" icon={<SearchOutlined />}>
+              搜索
+            </Button>
+          </Form.Item>
+          <Form.Item>
+            <Button
+              type="primary"
+              icon={<PlusCircleFilled />}
+              onClick={handlecreateCate}
+            >
+              创建分类
+            </Button>
+          </Form.Item>
+        </Form>
+      </div>
       <Table
         size="small"
         rowKey="id"
@@ -249,7 +253,12 @@ const Categroies: React.FC<CategroiesProps> = () => {
         loading={tableLoading}
         columns={columns}
         dataSource={list}
-        pagination={paginationOptions}
+        pagination={{
+          showQuickJumper: true,
+          current: queryParams.page,
+          onChange: handleChange,
+          showTotal: (total: number) => `总条数 ${total}`
+        }}
       />
       <Modal
         title="创建分类"
@@ -257,7 +266,12 @@ const Categroies: React.FC<CategroiesProps> = () => {
         footer={null}
         onCancel={onCancel}
       >
-        <Form onFinish={handleSubmit} {...formItemLayout}>
+        <Form
+          onFinish={handleSubmit}
+          form={form}
+          initialValues={formData}
+          {...formItemLayout}
+        >
           <Form.Item
             label="名称"
             name="name"
@@ -271,11 +285,7 @@ const Categroies: React.FC<CategroiesProps> = () => {
           >
             <Input placeholder="请输入名称" />
           </Form.Item>
-          <Form.Item
-            label="状态"
-            name="state"
-            valuePropName="checked"
-          >
+          <Form.Item label="状态" name="state" valuePropName="checked">
             <Switch />
           </Form.Item>
           <Form.Item {...tailFormItemLayout}>

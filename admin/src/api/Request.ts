@@ -3,9 +3,10 @@
  * @Author: leo
  * @Date: 2019-09-18 20:33:59
  * @LastEditors: leo
- * @LastEditTime: 2020-02-25 18:44:12
+ * @LastEditTime: 2020-02-26 15:01:40
  */
 import axios, { AxiosRequestConfig, AxiosResponse } from 'axios'
+import { getToken } from 'utils/auth'
 
 // 请求超时时间
 axios.defaults.timeout = 10000
@@ -15,7 +16,7 @@ axios.interceptors.request.use(
   (config: AxiosRequestConfig) => {
     config.baseURL = 'http://localhost:8000/api/v1'
     // 需要向 headers 里面添加 token
-    config.headers.Authorization = ''
+    config.headers.Authorization = getToken()
     config.withCredentials = true
     return config
   },
@@ -73,11 +74,11 @@ export default {
       data
     })
   },
-  put(params: any, url: string) {
+  put(data: any, url: string) {
     return axios({
       method: 'put',
       url,
-      params
+      data
     })
   },
   delete(params: any, url: string) {

@@ -1,19 +1,21 @@
 import React, { useState, useEffect } from 'react'
-import { Table, Divider, Layout, Button, Modal, message, Form } from 'antd'
+import {
+  Table,
+  Divider,
+  Layout,
+  Button,
+  Modal,
+  message,
+  Form,
+  Input
+} from 'antd'
 import api from 'api'
 import { iSuccessResult } from '@interface/global.interface'
 import dayjs from 'dayjs'
+import { SearchOutlined, PlusCircleFilled } from '@ant-design/icons'
+import styles from './article.module.less'
 
 const { Content } = Layout
-
-const data: any = Array.from({ length: 6 }).map((_item, index: number) => {
-  return {
-    id: index + 1,
-    title: `第一技术 ${index}`,
-    caption: `第一生产力 ${index}`,
-    createdAt: '2019-09-23'
-  }
-})
 
 export interface ArticleProps {
   history?: any
@@ -22,23 +24,30 @@ const Article: React.FC<ArticleProps> = ({ history }) => {
   const columns = [
     {
       title: '标题',
-      dataIndex: 'name',
-      key: 'name',
+      dataIndex: 'title',
+      key: 'title',
       align: 'center' as 'center'
     },
     {
       title: '描述',
-      dataIndex: 'caption',
-      key: 'caption',
+      dataIndex: 'desc',
+      key: 'desc',
       align: 'center' as 'center'
     },
     {
-      title: '创建时间',
-      dataIndex: 'createdAt',
-      key: 'createdAt',
+      title: '状态',
+      dataIndex: 'state',
+      key: 'state',
       align: 'center' as 'center',
-      render: (_text: any, record: any) => (
-        <span>{dayjs(record.createdAt).format('YYYY-MM-DD HH:mm:ss')}</span>
+      render: (text: any) => <span>{text === 0 ? '启用' : '禁用'}</span>
+    },
+    {
+      title: '创建时间',
+      dataIndex: 'created_on',
+      key: 'created_on',
+      align: 'center' as 'center',
+      render: (_text: any) => (
+        <span>{dayjs.unix(_text).format('YYYY-MM-DD HH:mm')}</span>
       )
     },
     {
@@ -68,24 +77,20 @@ const Article: React.FC<ArticleProps> = ({ history }) => {
     }
   ]
 
-  const [loading, setloading] = useState(false)
-  const [list, setlist] = useState([])
-  const [count, setcount] = useState(0)
+  const [tableData, settableData] = useState({
+    lists: [],
+    total: 0,
+    loading: false
+  })
   const [page, setpage] = useState(1)
-  // 分页配置
-  const paginationOptions = {
-    showQuickJumper: true,
-    total: count,
-    onChange: (page: number) => setpage(page),
-    showTotal: (total: number) => `总条数 ${total} 条`
-  }
+
   // 发布文章
   function createArticle() {
     history.push('/article/create')
   }
   // 编辑文章
   function editHandle(record: any) {
-    history.push(`/article/create?id=${record._id}`)
+    history.push(`/article/create?id=${record.id}`)
   }
   // 删除文章
   function deleteHandle(record: any) {
@@ -95,7 +100,7 @@ const Article: React.FC<ArticleProps> = ({ history }) => {
       okText: '确认',
       cancelText: '取消',
       onOk: () => {
-        deleteArticleById(record._id)
+        deleteArticleById(record.id)
       }
     })
   }
@@ -116,15 +121,19 @@ const Article: React.FC<ArticleProps> = ({ history }) => {
   // 获取文章列表
   async function fetchList() {
     try {
-      setloading(true)
-      const result: iSuccessResult = await api.articleList({ page, rows: 10 })
-      setloading(false)
+      settableData((r: any) => ({ ...r, loading: true }))
+      const result: iSuccessResult = await api.articleList({ page })
       if (result.code === 200) {
-        setcount(result.data.count)
-        setlist(result.data.list)
+        settableData({
+          lists: result.data.lists,
+          total: result.data.total,
+          loading: false
+        })
+      } else {
+        settableData((r: any) => ({ ...r, loading: false }))
       }
     } catch (error) {
-      setloading(false)
+      settableData((r: any) => ({ ...r, loading: false }))
       throw error
     }
   }
@@ -133,20 +142,44 @@ const Article: React.FC<ArticleProps> = ({ history }) => {
   }, [page])
   return (
     <Content>
-      <Form layout="inline">
-        <Form.Item>
-          <Button type="primary" onClick={createArticle}>
-            发布文章
-          </Button>
-        </Form.Item>
-      </Form>
+      <div className={styles.heading}>
+        <Form layout="inline">
+          <Form.Item label="标题">
+            <Input placeholder="请输入标题" />
+          </Form.Item>
+          <Form.Item label="分类">
+            <Input placeholder="请选择分类" />
+          </Form.Item>
+          <Form.Item>
+            <Button type="primary" icon={<SearchOutlined />}>
+              搜索
+            </Button>
+          </Form.Item>
+          <Form.Item>
+            <Button
+              type="primary"
+              icon={<PlusCircleFilled />}
+              onClick={createArticle}
+            >
+              发布文章
+            </Button>
+          </Form.Item>
+        </Form>
+      </div>
       <Table
         size="small"
-        rowKey="_id"
-        loading={loading}
+        rowKey="id"
+        loading={tableData.loading}
         columns={columns}
-        dataSource={list}
-        pagination={paginationOptions}
+        bordered
+        dataSource={tableData.lists}
+        pagination={{
+          showQuickJumper: true,
+          total: tableData.total,
+          current: page,
+          onChange: (page: number) => setpage(page),
+          showTotal: (total: number) => `总条数 ${total} 条`
+        }}
       />
     </Content>
   )

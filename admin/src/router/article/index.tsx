@@ -3,7 +3,7 @@
  * @Author: leo
  * @Date: 2019-09-17 12:00:32
  * @LastEditors: leo
- * @LastEditTime: 2020-02-25 19:26:06
+ * @LastEditTime: 2020-02-26 16:51:39
  */
 import { lazy } from 'react'
 import { iRoute } from '@interface/router.interface'
@@ -11,7 +11,7 @@ import { iRoute } from '@interface/router.interface'
 // 文章列表
 const Article = lazy(() => import('views/article/Article'))
 // 发布文章
-const CreateArticle = lazy(() => import('views/article/CreateArticle'))
+const CreateArticle = lazy(() => import('views/article/CreateOrUpdateArticle'))
 
 export const ArticleRoutes: iRoute[] = [
   {
@@ -20,7 +20,7 @@ export const ArticleRoutes: iRoute[] = [
     component: Article
   },
   {
-    name: '发布文章',
+    name: '文章编辑',
     path: '/article/create',
     component: CreateArticle
   }
