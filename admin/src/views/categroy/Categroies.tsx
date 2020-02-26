@@ -7,7 +7,8 @@ import {
   Modal,
   Input,
   message,
-  Form
+  Form,
+  Switch
 } from 'antd'
 import { iSuccessResult } from '@interface/global.interface'
 import api from 'api'
@@ -29,10 +30,15 @@ const Categroies: React.FC<CategroiesProps> = () => {
       align: 'center' as 'center'
     },
     {
-      title: '排序',
-      dataIndex: 'sortNum',
-      key: 'sortNum',
-      align: 'center' as 'center'
+      title: '状态',
+      dataIndex: 'state',
+      key: 'state',
+      align: 'center' as 'center',
+      render: (text: any) => (
+        <span>
+          {text === 0 ? '启用' : '禁用'}
+        </span>
+      )
     },
     {
       title: '操作',
@@ -66,6 +72,7 @@ const Categroies: React.FC<CategroiesProps> = () => {
   const [name, setname] = useState('')
   const [sort, setsort] = useState('')
   const [id, setid] = useState('')
+  const [formData, setformData] = useState({ name: '', state: 0})
   const [queryParams, setqueryParams] = useState({
     page: 1,
     name: '',
@@ -166,10 +173,10 @@ const Categroies: React.FC<CategroiesProps> = () => {
   // 提交创建分类
   function handleSubmit(values: any) {
     if (isAdd) {
-      console.log('-----------------')
-      createCate(values)
+      console.log('-----------------', values)
+      // createCate(values)
     } else {
-      updateCate(values)
+      // updateCate(values)
     }
   }
   // 点击创建分类
@@ -192,7 +199,7 @@ const Categroies: React.FC<CategroiesProps> = () => {
       const result: iSuccessResult = await api.cateList(queryParams)
       settableLoading(false)
       if (result.code === 200) {
-        setlist(result.data)
+        setlist(result.data.lists)
       } else {
         message.error(result.msg)
       }
@@ -237,7 +244,8 @@ const Categroies: React.FC<CategroiesProps> = () => {
       </Form>
       <Table
         size="small"
-        rowKey="_id"
+        rowKey="id"
+        bordered
         loading={tableLoading}
         columns={columns}
         dataSource={list}
@@ -264,17 +272,11 @@ const Categroies: React.FC<CategroiesProps> = () => {
             <Input placeholder="请输入名称" />
           </Form.Item>
           <Form.Item
-            label="排序"
-            name="sort"
-            rules={[
-              {
-                required: true,
-                message: '请输入排序!'
-              }
-            ]}
-            hasFeedback
+            label="状态"
+            name="state"
+            valuePropName="checked"
           >
-            <Input placeholder="请输入排序" />
+            <Switch />
           </Form.Item>
           <Form.Item {...tailFormItemLayout}>
             <Button
