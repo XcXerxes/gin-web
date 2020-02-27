@@ -59,6 +59,7 @@ const Home:React.FC<HomePorps> = () => {
   const [list, setlist] = useState([])
   const [page, setpage] = useState(1)
   const [cateList, setcateList] = useState([])
+  const [activeIndex, setactiveIndex] = useState(0)
   function fetchMoreData () {
     setpage(page => page + 1)
     console.log('-----')
@@ -68,9 +69,9 @@ const Home:React.FC<HomePorps> = () => {
   }
   async function fetchCate () {
     try {
-      const result:any = await api.cateList({})
+      const result:any = await api.cateList({page})
       if (result.code === 200) {
-        setcateList(result.data)
+        setcateList(result.data.lists)
       }
     } catch (error) {
       
@@ -92,6 +93,9 @@ const Home:React.FC<HomePorps> = () => {
   useEffect(() => {
     fetchArticleList()
   }, [page])
+  function itemClick(v: any, i: number) {
+    setactiveIndex(i)
+  }
   return (
     <div className="container">
       <StyledBannerWrapper>
@@ -101,7 +105,7 @@ const Home:React.FC<HomePorps> = () => {
         <StyledContent>
           <StyledMain>
             <StyledTabs>
-              <Tabs tabs={cateList} />
+              <Tabs itemClick={itemClick} tabs={cateList} activeIndex={activeIndex} />
             </StyledTabs>
             <StyledPost
               dataLength={list.length}
@@ -110,7 +114,7 @@ const Home:React.FC<HomePorps> = () => {
               loader={<Loading />}
             >
               {list.map((item:any, index: number) => (
-                <ArticleItem {...item} key={item._id} />
+                <ArticleItem {...item} key={item.id} />
               ))}
             </StyledPost>
           </StyledMain>

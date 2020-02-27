@@ -13,7 +13,7 @@ axios.defaults.timeout = 10000
 // 请求拦截器
 axios.interceptors.request.use(
   (config: AxiosRequestConfig) => {
-    config.baseURL = 'http://localhost:8000/api/v1'
+    config.baseURL = 'http://localhost:8000/api/v1/web'
     // 需要向 headers 里面添加 token
     config.headers.Authorization = ''
     return config

@@ -36,15 +36,17 @@ const StyledLi = styled.li`
 `
 export interface TabsProps {
   tabs: Array<any>;
-  activeIndex?: number;
+  activeIndex: number;
+  itemClick: (item: any, i: number) => void
 }
 
-const Tabs:React.FC<TabsProps> = ({ tabs, activeIndex }) => {
+const Tabs:React.FC<TabsProps> = ({ tabs, activeIndex, itemClick }) => {
   return (
     <StyledWrapper>
       <StyledUl>
         {tabs.map((item: any, index: number) => (
-          <StyledLi className={ activeIndex === index ? 'active' : '' } key={item._id}>{item.name}</StyledLi>
+          <StyledLi onClick={() => itemClick(item, index)}
+            className={ activeIndex === index ? 'active' : '' } key={item.id}>{item.name}</StyledLi>
         ))}
       </StyledUl>
     </StyledWrapper>

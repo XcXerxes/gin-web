@@ -273,7 +273,7 @@ const AdverCreate: React.FC<IAdverCreateProps> = props => {
           <div className="clearfix">
             <Upload
               name="image"
-              action={'http://localhost:8000/api/v1/upload'}
+              action={'http://localhost:8000/api/v1/admin/upload'}
               listType="picture-card"
               onChange={uploadHandleChange}
               fileList={fileList}
