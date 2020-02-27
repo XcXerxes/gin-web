@@ -1,6 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react'
 import styled from 'styled-components'
-import Viewer from 'tui-editor/dist/tui-editor-Viewer'
+import MarkdownIt from 'markdown-it'
+import 'assets/styles/markdown.css'
+import dayjs from 'dayjs'
+
 import api from 'api'
 // import MarkdownIt from 'markdown-it'
 import hljs from 'highlight.js'
@@ -19,20 +22,25 @@ const StyledAuthorWrapper = styled.div`
   display: flex;
 `
 
+const markdownParser = new MarkdownIt({
+  html: true,
+  linkify: true,
+  typographer: true,
+  langPrefix: 'language-'
+})
+
 interface ArticleProps {
   location?: any
   match?: any
 }
 const Article: React.FC<ArticleProps> = props => {
   const [articleInfo, setarticleInfo] = useState<any>({})
-  const [content, setcontent] = useState('')
   const articleRef = useRef(null)
   async function fetchArticleDetail() {
     try {
       console.log(props)
       const { id } = props.match.params
       const result: any = await api.articleDetailById({ id })
-      debugger
       if (result.code === 200) {
         setarticleInfo({ ...result.data })
       }
@@ -54,23 +62,29 @@ const Article: React.FC<ArticleProps> = props => {
     // })
     fetchArticleDetail()
   }, [])
+  const _html = React.useMemo(
+    () =>
+      articleInfo.content ? markdownParser.render(articleInfo.content) : '',
+    [articleInfo.content]
+  )
   return (
     <div className="container">
       <div className="grid">
         <StyledHeading>
           <StyledHeadingImg
-            src={`http://localhost:7001/public/${articleInfo.thumbnail}`}
-            alt={articleInfo.name}
+            src={`http://localhost:8000/${articleInfo.cover_image_url}`}
+            alt={articleInfo.title}
           />
         </StyledHeading>
-        <StyledHeadingTitle>{articleInfo.name}</StyledHeadingTitle>
+        <StyledHeadingTitle>{articleInfo.title}</StyledHeadingTitle>
         <StyledAuthorWrapper>
-          by {articleInfo.author} on {articleInfo.updatedAt}
+          by {articleInfo.created_by} on{' '}
+          {dayjs.unix(articleInfo.modified_on).format('YYYY-MM-DD HH:mm:ss')}
         </StyledAuthorWrapper>
         <div
-          className="tui-editor-contents"
+          className="markdown-body"
           ref={articleRef}
-          dangerouslySetInnerHTML={{ __html: articleInfo.content }}
+          dangerouslySetInnerHTML={{ __html: _html }}
         />
       </div>
     </div>

@@ -1,14 +1,13 @@
 import React from 'react'
 import styled from 'styled-components'
 import XNav from './Nav'
-import { Link } from 'react-router-dom'
 import SearchInput from '../SearchInput'
 
 const StyledHeader = styled.header`
   height: 60px;
   width: 100%;
-  background-color: rgba(255,255,255,.95);
-  box-shadow: 2px -3px 10px 0px rgba(0, 0, 0, .3);
+  background-color: rgba(255, 255, 255, 0.95);
+  box-shadow: 2px -3px 10px 0px rgba(0, 0, 0, 0.3);
   position: sticky;
   z-index: 10;
   top: 0;
@@ -27,13 +26,17 @@ const StyledLogo = styled.div`
   height: 100%;
   padding: 12px 0%;
 `
-const StyledLink = styled(Link)`
+const StyledLink = styled.a`
   display: flex;
   width: 105px;
   height: 36px;
 `
 const StyledLogoImg = styled.img`
   max-height: 100%;
+`
+const StyleLogoText = styled.h1`
+  color: #6190e8;
+  font-size: 24px;
 `
 const StyledNav = styled.div`
   @media only screen and (max-width: 992px) {
@@ -51,15 +54,16 @@ const StyledLeft = styled.div`
   display: flex;
   height: inherit;
 `
-const XHeader:React.FC = () => {
+const XHeader: React.FC = () => {
   return (
     <StyledHeader>
       <div className="grid">
         <StyledContent>
           <StyledLeft>
             <StyledLogo>
-              <StyledLink to="/">
-                <StyledLogoImg src={require('../../assets/images/o2logo@2x.png')} alt="xcxerxes"/>
+              <StyledLink href="https://github.com/XcXerxes" target="_blank">
+                <StyleLogoText>Xcxerxes</StyleLogoText>
+                {/* <StyledLogoImg src={require('../../assets/images/o2logo@2x.png')} alt="xcxerxes"/> */}
               </StyledLink>
             </StyledLogo>
             <StyledNav>

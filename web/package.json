@@ -11,7 +11,9 @@
     "@types/react": "^16.9.0",
     "@types/react-dom": "^16.9.0",
     "axios": "^0.19.2",
+    "dayjs": "^1.8.21",
     "highlight.js": "^9.18.1",
+    "markdown-it": "^10.0.0",
     "marked": "^0.8.0",
     "nprogress": "^0.2.0",
     "react": "^16.12.0",
@@ -46,6 +48,7 @@
   },
   "devDependencies": {
     "@types/highlight.js": "^9.12.3",
+    "@types/markdown-it": "^0.0.9",
     "@types/marked": "^0.7.2",
     "@types/nprogress": "^0.2.0",
     "@types/react-content-loader": "^4.0.0",

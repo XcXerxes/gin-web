@@ -8,15 +8,15 @@ const StyledArticle = styled(Link)`
   flex-direction: column;
   margin-bottom: 30px;
   position: relative;
-  transition: all .25s ease;
+  transition: all 0.25s ease;
   overflow: hidden;
   &:hover {
-    box-shadow: 0 1px 2px rgba(0,0,0,.1);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
     transform: translateY(-2px);
   }
   @media only screen and (max-width: 992px) {
     margin: 0 15px 20px;
-    box-shadow: 0 1px 2px rgba(0,0,0,.1);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
   }
 `
 const StyledLight = styled.i`
@@ -26,12 +26,17 @@ const StyledLight = styled.i`
   top: 0;
   width: 100%;
   height: 100%;
-  background-image: -webkit-linear-gradient(0deg,hsla(0,0%,100%,0),hsla(0,0%,100%,.5),hsla(0,0%,100%,0));
+  background-image: -webkit-linear-gradient(
+    0deg,
+    hsla(0, 0%, 100%, 0),
+    hsla(0, 0%, 100%, 0.5),
+    hsla(0, 0%, 100%, 0)
+  );
   transform: skewx(-25deg);
 
   ${StyledArticle}:hover & {
-    transition: all .4s ease;
-    left: 100%
+    transition: all 0.6s ease;
+    left: 100%;
   }
 `
 const StyledMedia = styled.div`
@@ -69,26 +74,35 @@ const StyledDesc = styled.p`
   line-clamp: 2;
   box-orient: vertical;
   word-wrap: break-word;
-  font-size: .8em;
+  font-size: 0.8em;
 `
 export interface ArticleItemProps {
-  name: string;
-  caption: string;
-  thumbnail: string;
-  style?: any;
-  _id: string;
+  title: string
+  desc: string
+  cover_image_url: string
+  style?: any
+  id: number
 }
 
-const ArticleItem:React.FC<ArticleItemProps> = ({_id, name, caption, thumbnail, style }) => {
+const ArticleItem: React.FC<ArticleItemProps> = ({
+  id,
+  title,
+  desc,
+  cover_image_url,
+  style
+}) => {
   return (
     <Col sm="12" md="6" lg="4" xlg="3" gutter={20}>
-      <StyledArticle to={`/article/${_id}`} style={style}>
+      <StyledArticle to={`/article/${id}`} style={style}>
         <StyledMedia>
-          <StyledImg src={`http://localhost:7001/public/${thumbnail}`}  alt={name} />
+          <StyledImg
+            src={`http://localhost:8000/${cover_image_url}`}
+            alt={title}
+          />
         </StyledMedia>
         <StyledFooter>
-          <StyledTitle>{name}</StyledTitle>
-          <StyledDesc>{caption}</StyledDesc>
+          <StyledTitle>{title}</StyledTitle>
+          <StyledDesc>{desc}</StyledDesc>
         </StyledFooter>
         <StyledLight />
       </StyledArticle>

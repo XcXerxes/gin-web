@@ -1,0 +1,21 @@
+version: "3"
+
+services:
+  # admin:
+  #   image: admin
+  #   build:
+  #     context: ./admin
+  #     dockerfile: Dockerfile
+  #   ports:
+  #     - "6710:8989"
+  web:
+    image: web
+    container_name: my_web
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+    volumes:
+      - ./web/build:/usr/local/var/www/ #挂载项目
+    restart: on-failure
+    ports:
+      - 80:3000

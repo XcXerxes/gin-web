@@ -7,9 +7,8 @@ import InfiniteScroll from 'react-infinite-scroll-component'
 import Loading from 'components/Loading'
 import api from 'api'
 
-
 const StyledBannerWrapper = styled.div`
-  height: 500px;
+  height: 400px;
   @media only screen and (max-width: 992px) {
     height: 200px;
   }
@@ -53,59 +52,70 @@ const StyledPost = styled(InfiniteScroll)`
   flex-wrap: wrap;
 `
 interface HomePorps {
-  history?: any;
+  history?: any
 }
-const Home:React.FC<HomePorps> = () => {
+const Home: React.FC<HomePorps> = () => {
   const [list, setlist] = useState([])
+
   const [page, setpage] = useState(1)
-  const [cateList, setcateList] = useState([])
+  const [queryParams, setqueryParams] = useState({ page: 1, tag_id: -1 })
+  const [cateList, setcateList] = useState<any>([])
   const [activeIndex, setactiveIndex] = useState(0)
-  function fetchMoreData () {
+  function fetchMoreData() {
     setpage(page => page + 1)
     console.log('-----')
     // setTimeout(() => {
     //   setlist(list.concat(data))
     // }, 1500)
   }
-  async function fetchCate () {
+  async function fetchCate() {
     try {
-      const result:any = await api.cateList({page})
+      const result: any = await api.cateList({ page: 1 })
       if (result.code === 200) {
         setcateList(result.data.lists)
+        setqueryParams((r: any) => ({ ...r, tag_id: result.data.lists[0].id }))
       }
-    } catch (error) {
-      
-    }
+    } catch (error) {}
   }
-  async function fetchArticleList () {
+  async function fetchArticleList() {
     try {
-      const result:any = await api.articleList({ rows: 9, page})
+      const result: any = await api.articleList(queryParams)
       if (result.code === 200) {
-        setlist(result.data.list)
+        setlist(result.data.lists)
       }
-    } catch (error) {
-      
-    }
+    } catch (error) {}
   }
   useEffect(() => {
-    fetchCate()
+    ;(async () => {
+      await fetchCate()
+    })()
   }, [])
   useEffect(() => {
-    fetchArticleList()
-  }, [page])
+    if (queryParams.tag_id !== -1) {
+      fetchArticleList()
+    }
+  }, [queryParams.page, queryParams.tag_id])
   function itemClick(v: any, i: number) {
     setactiveIndex(i)
+    setqueryParams((r: any) => ({ ...r, tag_id: cateList[i].id }))
   }
   return (
     <div className="container">
       <StyledBannerWrapper>
-        <StyledBannerImg src={require('../assets/images/banner.jpg')} alt="banner" />
+        <StyledBannerImg
+          src={require('../assets/images/banner.jpg')}
+          alt="banner"
+        />
       </StyledBannerWrapper>
       <div className="grid">
         <StyledContent>
           <StyledMain>
             <StyledTabs>
-              <Tabs itemClick={itemClick} tabs={cateList} activeIndex={activeIndex} />
+              <Tabs
+                itemClick={itemClick}
+                tabs={cateList}
+                activeIndex={activeIndex}
+              />
             </StyledTabs>
             <StyledPost
               dataLength={list.length}
@@ -113,7 +123,7 @@ const Home:React.FC<HomePorps> = () => {
               hasMore={false}
               loader={<Loading />}
             >
-              {list.map((item:any, index: number) => (
+              {list.map((item: any, index: number) => (
                 <ArticleItem {...item} key={item.id} />
               ))}
             </StyledPost>
