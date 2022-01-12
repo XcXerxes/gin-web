@@ -13,7 +13,7 @@
     "axios": "^0.19.2",
     "dayjs": "^1.8.21",
     "highlight.js": "^9.18.1",
-    "markdown-it": "^10.0.0",
+    "markdown-it": "^12.3.2",
     "marked": "^0.8.0",
     "nprogress": "^0.2.0",
     "react": "^16.12.0",
